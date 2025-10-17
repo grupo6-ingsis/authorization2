@@ -1,0 +1,10 @@
+auth0:
+  audience: ${AUTH0_AUDIENCE:https://snipet-searcher.com}
+spring:
+  application:
+    name: resource-service-with-auth-example
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_SERVER_URI:https://dev-dxya2auaytwzj1s4.us.auth0.com/}
