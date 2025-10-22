@@ -43,4 +43,9 @@ class PermissionService (private val permissionRepository: PermissionRepository)
             permissions = permissionTypes.map { it.value }
         )
     }
+
+    fun getPermissionsForSnippet(snippetId: String, userId: String): List<PermissionType> {
+        val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
+        return permission?.permissions?.map { it } ?: emptyList()
+    }
 }
