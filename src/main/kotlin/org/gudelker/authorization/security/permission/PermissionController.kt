@@ -32,5 +32,4 @@ class PermissionController (private val permissionService: PermissionService) {
     ): List<PermissionType> {
         return permissionService.getPermissionsForSnippet(userId, snippetId)
     }
-
 }
