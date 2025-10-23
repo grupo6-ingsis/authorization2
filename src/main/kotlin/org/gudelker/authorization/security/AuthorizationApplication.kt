@@ -1,6 +1,5 @@
 package org.gudelker.authorization.security
 
-import org.gudelker.authorization.security.dto.UserDto
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.security.access.prepost.PreAuthorize
@@ -23,7 +22,7 @@ class AuthenticationServiceApplication {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody body: UserDto): String {
+    fun login(): String {
         return "You are logged in!"
     }
 
