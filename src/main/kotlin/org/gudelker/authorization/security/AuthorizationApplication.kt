@@ -2,7 +2,9 @@ package org.gudelker.authorization.security
 
 import org.gudelker.authorization.security.dto.UserDto
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,23 +13,27 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
-
 @RestController
 @SpringBootApplication
+@EntityScan("org.gudelker.authorization.security.permission")
+@EnableJpaRepositories("org.gudelker.authorization.security.permission")
 class AuthenticationServiceApplication {
-
     @GetMapping("/")
     fun index(): String {
         return "I'm Alive!"
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody body: UserDto): String {
+    fun login(
+        @RequestBody body: UserDto,
+    ): String {
         return "You are logged in!"
     }
 
     @GetMapping("/jwt")
-    fun jwt(@AuthenticationPrincipal jwt: Jwt): String {
+    fun jwt(
+        @AuthenticationPrincipal jwt: Jwt,
+    ): String {
         return jwt.tokenValue
     }
 
@@ -37,12 +43,16 @@ class AuthenticationServiceApplication {
     }
 
     @GetMapping("/snippets/{id}")
-    fun getSingleMessage(@PathVariable id: String): String {
+    fun getSingleMessage(
+        @PathVariable id: String,
+    ): String {
         return "secret message $id"
     }
 
     @PostMapping("/snippets")
-    fun createMessage(@RequestBody message: String?): String {
+    fun createMessage(
+        @RequestBody message: String?,
+    ): String {
         return String.format("Message was created. Content: %s", message)
     }
 }
@@ -50,4 +60,3 @@ class AuthenticationServiceApplication {
 fun main(args: Array<String>) {
     runApplication<AuthenticationServiceApplication>(*args)
 }
-

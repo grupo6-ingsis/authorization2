@@ -8,23 +8,20 @@ import jakarta.persistence.Id
 import java.util.UUID
 
 @Entity
-class Permission (
+class Permission(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID = UUID.randomUUID(),
-
     @Column(nullable = false)
-    val userId: String,
-
+    val userId: String = "",
     @Column(nullable = false)
-    val snippetId: String,
-
+    val snippetId: String = "",
     @Column(nullable = false)
-    var permissions: List<PermissionType>
+    var permissions: List<PermissionType> = emptyList(),
 )
 
 enum class PermissionType(val value: String) {
     READ("READ"),
     WRITE("WRITE"),
-    OWNER("OWNER")
+    OWNER("OWNER"),
 }

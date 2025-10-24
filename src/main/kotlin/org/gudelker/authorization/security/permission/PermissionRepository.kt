@@ -5,5 +5,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
-    fun findByUserIdAndSnippetId(userId: String, snippetId: String): Permission?
+    fun findByUserIdAndSnippetId(
+        userId: String,
+        snippetId: String,
+    ): Permission?
 }
