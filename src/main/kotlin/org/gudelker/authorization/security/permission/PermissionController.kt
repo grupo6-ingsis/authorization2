@@ -1,7 +1,7 @@
 package org.gudelker.authorization.security.permission
 
-import org.gudelker.authorization.security.permission.dto.AuthorizeResponseDto
-import org.gudelker.authorization.security.permission.input.AuthorizeRequestDto
+import org.gudelker.authorization.security.dto.AuthorizeResponseDto
+import org.gudelker.authorization.security.input.AuthorizeRequestDto
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping

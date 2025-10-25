@@ -1,4 +1,4 @@
-package org.gudelker.authorization.security.permission.dto
+package org.gudelker.authorization.security.dto
 
 data class AuthorizeResponseDto(
     val success: Boolean,

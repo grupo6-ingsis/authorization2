@@ -1,6 +1,6 @@
 package org.gudelker.authorization.security.permission
 
-import org.gudelker.authorization.security.permission.dto.AuthorizeResponseDto
+import org.gudelker.authorization.security.dto.AuthorizeResponseDto
 import org.springframework.stereotype.Service
 
 @Service
