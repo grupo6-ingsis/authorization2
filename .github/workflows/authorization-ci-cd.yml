@@ -66,9 +66,10 @@ jobs:
   deploy:
     needs: push_to_registry
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main'  || github.ref == 'refs/heads/dev'
     steps:
-      - name: Deploy to VM
+      - name: Deploy to VM (main)
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VM_PUBLIC_IP }}
@@ -76,10 +77,18 @@ jobs:
           key: ${{ secrets.RSA_VM_KEY }}
           script: |
             cd ~/infra
-            if [ "${GITHUB_REF##*/}" = "dev" ]; then
-              git switch dev
-            else
-              git switch main
-            fi
+            sudo git pull
+            ./start-docker.sh
+
+      - name: Deploy to VM (dev)
+        if: github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_PUBLIC_IP }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.RSA_VM_KEY }}
+          script: |
+            cd ~/infra
+            sudo git pull
             ./start-docker.sh
           
