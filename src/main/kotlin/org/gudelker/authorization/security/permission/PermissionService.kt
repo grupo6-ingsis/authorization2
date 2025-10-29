@@ -25,16 +25,29 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
             )
         }
 
-        val permission =
-            permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
-                ?.apply { this.permissions = permissionTypes }
-                ?: Permission(
-                    userId = userId,
-                    snippetId = snippetId,
-                    permissions = permissionTypes,
-                )
+        val existing = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
 
-        permissionRepository.save(permission)
+        val mergedPermissions =
+            if (existing != null) {
+                (existing.permissions + permissionTypes).distinct()
+            } else {
+                permissionTypes
+            }
+
+        if (existing != null) {
+            permissionRepository.delete(existing)
+            permissionRepository.flush()
+        }
+
+        // New entity with merged permissions
+        val newPermission =
+            Permission(
+                userId = userId,
+                snippetId = snippetId,
+                permissions = mergedPermissions,
+            )
+
+        permissionRepository.save(newPermission)
 
         return AuthorizeResponseDto(
             success = true,
