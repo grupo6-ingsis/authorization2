@@ -13,7 +13,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
     steps:
       - uses: actions/checkout@v4
         with:
