@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Transient
 import java.util.UUID
 
 @Entity
@@ -16,9 +17,35 @@ class Permission(
     val userId: String = "",
     @Column(nullable = false)
     val snippetId: String = "",
-    @Column(nullable = false)
-    var permissions: List<PermissionType> = emptyList(),
-)
+    @Column(nullable = false, name = "permissions")
+    private var permissionsString: String = "",
+) {
+    @get:Transient
+    var permissions: List<PermissionType>
+        get() =
+            if (permissionsString.isBlank()) {
+                emptyList()
+            } else {
+                permissionsString.split(",").mapNotNull { str ->
+                    PermissionType.entries.find { it.value == str.trim() }
+                }
+            }
+        set(value) {
+            permissionsString = value.joinToString(",") { it.value }
+        }
+
+    // Constructor secundario
+    constructor(
+        userId: String,
+        snippetId: String,
+        permissions: List<PermissionType>,
+    ) : this(
+        id = UUID.randomUUID(),
+        userId = userId,
+        snippetId = snippetId,
+        permissionsString = permissions.joinToString(",") { it.value },
+    )
+}
 
 enum class PermissionType(val value: String) {
     READ("READ"),
