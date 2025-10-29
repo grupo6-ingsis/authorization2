@@ -2,9 +2,12 @@ package org.gudelker.authorization.security.permission
 
 import org.gudelker.authorization.security.dto.AuthorizeResponseDto
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PermissionService(private val permissionRepository: PermissionRepository) {
+
+    @Transactional
     fun authorize(
         userId: String,
         snippetId: String,
@@ -23,19 +26,13 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
             )
         }
 
-        val existingPermission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
-
-        val permission =
-            if (existingPermission != null) {
-                existingPermission.permissions = permissionTypes
-                existingPermission
-            } else {
-                Permission(
-                    userId = userId,
-                    snippetId = snippetId,
-                    permissions = permissionTypes,
-                )
-            }
+        val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
+            ?.apply { this.permissions = permissionTypes }
+            ?: Permission(
+                userId = userId,
+                snippetId = snippetId,
+                permissions = permissionTypes,
+            )
 
         permissionRepository.save(permission)
 
