@@ -21,6 +21,7 @@ class PermissionController(private val permissionService: PermissionService) {
         @RequestBody request: AuthorizeRequestDto,
         @AuthenticationPrincipal jwt: Jwt,
     ): AuthorizeResponseDto {
+        println(request)
         return permissionService.authorize(
             request.userId,
             snippetId,
@@ -44,11 +45,10 @@ class PermissionController(private val permissionService: PermissionService) {
         return permissionService.authorizeUpdate(jwt.id, snippetId)
     }
 
-
     @PostMapping("/can-write/{snippetId}")
     fun canUserWriteSnippet(
         @PathVariable snippetId: String,
-        @RequestHeader("X-User-Id") userId: String
+        @RequestHeader("X-User-Id") userId: String,
     ): Boolean {
         // Lógica para verificar si el usuario tiene permiso de escritura
         return permissionService.canUserWriteSnippet(snippetId, userId)
