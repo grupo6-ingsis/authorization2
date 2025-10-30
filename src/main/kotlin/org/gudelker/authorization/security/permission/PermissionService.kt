@@ -71,4 +71,12 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         val permissions = getPermissionsForSnippet(snippetId, userId)
         return permissions.contains(PermissionType.WRITE) || permissions.contains(PermissionType.OWNER)
     }
+
+    fun canUserWriteSnippet(
+        snippetId: String,
+        userId: String
+    ): Boolean {
+        val permissions = getPermissionsForSnippet(snippetId, userId)
+        return permissions.contains(PermissionType.WRITE) || permissions.contains(PermissionType.OWNER)
+    }
 }

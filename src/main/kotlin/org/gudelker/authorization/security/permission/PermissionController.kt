@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -41,5 +42,15 @@ class PermissionController(private val permissionService: PermissionService) {
         @AuthenticationPrincipal jwt: Jwt,
     ): Boolean {
         return permissionService.authorizeUpdate(jwt.id, snippetId)
+    }
+
+
+    @PostMapping("/can-write/{snippetId}")
+    fun canUserWriteSnippet(
+        @PathVariable snippetId: String,
+        @RequestHeader("X-User-Id") userId: String
+    ): Boolean {
+        // Lógica para verificar si el usuario tiene permiso de escritura
+        return permissionService.canUserWriteSnippet(snippetId, userId)
     }
 }
