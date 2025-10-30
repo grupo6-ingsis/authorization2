@@ -21,7 +21,6 @@ class PermissionController(private val permissionService: PermissionService) {
         @RequestBody request: AuthorizeRequestDto,
         @AuthenticationPrincipal jwt: Jwt,
     ): AuthorizeResponseDto {
-        println(request)
         return permissionService.authorize(
             request.userId,
             snippetId,
