@@ -10,73 +10,60 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
     fun authorize(
         userId: String,
         snippetId: String,
-        permissions: List<String>,
+        permission: String,
     ): AuthorizeResponseDto {
-        val permissionTypes =
-            permissions.mapNotNull { perm ->
-                PermissionType.entries.find { it.value == perm }
-            }
+        val permissionType = PermissionType.entries.find { it.value == permission }
 
-        if (permissionTypes.isEmpty()) {
+        if (permissionType == null) {
             return AuthorizeResponseDto(
                 success = false,
-                message = "There were not valid permissions to assign.",
-                permissions = null,
+                message = "There was not a valid permission to assign.",
+                permission = null,
             )
         }
 
         val existing = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
-
-        val mergedPermissions =
-            if (existing != null) {
-                (existing.permissions + permissionTypes).distinct()
-            } else {
-                permissionTypes
-            }
-
         if (existing != null) {
             permissionRepository.delete(existing)
             permissionRepository.flush()
         }
 
-        // New entity with merged permissions
         val newPermission =
             Permission(
                 userId = userId,
                 snippetId = snippetId,
-                permissions = mergedPermissions,
+                permission = permissionType,
             )
-
         permissionRepository.save(newPermission)
 
         return AuthorizeResponseDto(
             success = true,
-            message = "Permissions assigned successfully.",
-            permissions = permissionTypes.map { it.value },
+            message = "Permission assigned successfully.",
+            permission = permissionType.value,
         )
     }
 
-    fun getPermissionsForSnippet(
+    fun getPermissionForSnippet(
         snippetId: String,
         userId: String,
-    ): List<PermissionType> {
+    ): PermissionType? {
         val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
-        return permission?.permissions?.map { it } ?: emptyList()
+        return permission?.permission
     }
 
     fun authorizeUpdate(
         userId: String,
         snippetId: String,
     ): Boolean {
-        val permissions = getPermissionsForSnippet(snippetId, userId)
-        return permissions.contains(PermissionType.WRITE) || permissions.contains(PermissionType.OWNER)
+        val permission = getPermissionForSnippet(snippetId, userId)
+        return permission == PermissionType.WRITE || permission == PermissionType.OWNER
     }
 
     fun canUserWriteSnippet(
         snippetId: String,
-        userId: String
+        userId: String,
     ): Boolean {
-        val permissions = getPermissionsForSnippet(snippetId, userId)
-        return permissions.contains(PermissionType.WRITE) || permissions.contains(PermissionType.OWNER)
+        val permission = getPermissionForSnippet(snippetId, userId)
+        return permission == PermissionType.WRITE || permission == PermissionType.OWNER
     }
 }
