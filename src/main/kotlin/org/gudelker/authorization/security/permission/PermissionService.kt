@@ -13,23 +13,27 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         permission: PermissionType,
     ): AuthorizeResponseDto {
         val existing = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
-        if (existing != null) {
-            permissionRepository.delete(existing)
-            permissionRepository.flush()
-        }
 
-        val newPermission =
-            Permission(
-                userId = userId,
-                snippetId = snippetId,
-                permission = permission,
-            )
-        permissionRepository.save(newPermission)
+        val savedPermission =
+            if (existing != null) {
+                // MODIFICA la entidad existente (mismo id)
+                existing.permission = permission
+                permissionRepository.save(existing) // Hace UPDATE, no INSERT
+            } else {
+                // Crea nueva entidad con nuevo id
+                val newPermission =
+                    Permission(
+                        userId = userId,
+                        snippetId = snippetId,
+                        permission = permission,
+                    )
+                permissionRepository.save(newPermission) // Hace INSERT
+            }
 
         return AuthorizeResponseDto(
             success = true,
             message = "Permission assigned successfully.",
-            permission = permission.value,
+            permission = savedPermission.permission.value,
         )
     }
 
