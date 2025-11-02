@@ -10,18 +10,8 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
     fun authorize(
         userId: String,
         snippetId: String,
-        permission: String,
+        permission: PermissionType,
     ): AuthorizeResponseDto {
-        val permissionType = PermissionType.entries.find { it.value == permission }
-
-        if (permissionType == null) {
-            return AuthorizeResponseDto(
-                success = false,
-                message = "There was not a valid permission to assign.",
-                permission = null,
-            )
-        }
-
         val existing = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
         if (existing != null) {
             permissionRepository.delete(existing)
@@ -32,14 +22,14 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
             Permission(
                 userId = userId,
                 snippetId = snippetId,
-                permission = permissionType,
+                permission = permission,
             )
         permissionRepository.save(newPermission)
 
         return AuthorizeResponseDto(
             success = true,
             message = "Permission assigned successfully.",
-            permission = permissionType.value,
+            permission = permission.value,
         )
     }
 
@@ -56,7 +46,7 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         snippetId: String,
     ): Boolean {
         val permission = getPermissionForSnippet(snippetId, userId)
-        return permission == PermissionType.WRITE || permission == PermissionType.OWNER
+        return permission == PermissionType.WRITE
     }
 
     fun canUserWriteSnippet(
@@ -64,6 +54,6 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         userId: String,
     ): Boolean {
         val permission = getPermissionForSnippet(snippetId, userId)
-        return permission == PermissionType.WRITE || permission == PermissionType.OWNER
+        return permission == PermissionType.WRITE
     }
 }
