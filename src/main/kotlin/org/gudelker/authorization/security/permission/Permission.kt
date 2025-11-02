@@ -5,15 +5,17 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import org.hibernate.annotations.UuidGenerator
 import java.util.UUID
 
 @Entity
 class Permission(
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
+    @GeneratedValue(generator = "UUID")
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
+    val id: UUID? = null,
     @Column(nullable = false)
     val userId: String = "",
     @Column(nullable = false)
