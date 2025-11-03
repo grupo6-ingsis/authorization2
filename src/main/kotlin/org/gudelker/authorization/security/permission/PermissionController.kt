@@ -52,4 +52,12 @@ class PermissionController(private val permissionService: PermissionService) {
     ): Boolean {
         return permissionService.canUserWriteSnippet(snippetId, userId)
     }
+
+    @GetMapping("/snippetsByAccessType")
+    fun getSnippetsByAccessType(
+        @RequestParam userId: String,
+        @RequestParam accessType: PermissionType,
+    ): List<String> {
+        return permissionService.getSnippetsByAccessType(userId, accessType)
+    }
 }

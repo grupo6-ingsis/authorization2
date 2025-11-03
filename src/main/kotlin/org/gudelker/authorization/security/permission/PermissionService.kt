@@ -49,4 +49,14 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         val permission = getPermissionForSnippet(snippetId, userId)
         return permission == PermissionType.WRITE
     }
+
+    fun getSnippetsByAccessType(
+        userId: String,
+        accessType: PermissionType,
+    ): List<String> {
+        val permissions = permissionRepository.findAll()
+        return permissions.filter {
+            it.userId == userId && it.permission == accessType
+        }.map { it.snippetId }
+    }
 }
