@@ -12,6 +12,11 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         snippetId: String,
         permission: PermissionType,
     ): AuthorizeResponseDto {
+        val existingPermission =
+            permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
+        if (existingPermission != null) {
+            throw IllegalStateException("Permission already exists for this user and snippet")
+        }
         val newPermission =
             Permission(
                 userId = userId,
