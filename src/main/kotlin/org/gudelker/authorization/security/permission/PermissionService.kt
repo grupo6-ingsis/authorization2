@@ -63,10 +63,12 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         val userSnippets = permissions.filter { it.userId == userId }
         return when (accessType) {
             AccessType.ALL -> userSnippets.map { it.snippetId }
-            AccessType.OWNER -> userSnippets.filter { it.permission == PermissionType.WRITE }
-                .map { it.snippetId }
-            AccessType.SHARED -> userSnippets.filter { it.permission == PermissionType.READ }
-                .map { it.snippetId }
+            AccessType.OWNER ->
+                userSnippets.filter { it.permission == PermissionType.WRITE }
+                    .map { it.snippetId }
+            AccessType.SHARED ->
+                userSnippets.filter { it.permission == PermissionType.READ }
+                    .map { it.snippetId }
         }
     }
 }
