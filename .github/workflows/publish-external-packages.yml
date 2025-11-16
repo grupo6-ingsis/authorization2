@@ -1,20 +1,23 @@
 permissions:
   contents: write
   packages: write
-name: Authorization CI-CD
+name: Authorization Service CI-CD
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
       - dev
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+      AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+      AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+      AUTH0_TOKEN_URL: ${{ secrets.AUTH0_TOKEN_URL }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,8 +29,11 @@ jobs:
           distribution: temurin
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+      - name: Run ktlint format
+        run: ./gradlew ktlintFormat
       - name: Build with Gradle
         run: ./gradlew build
+
   push_to_registry:
     needs: build
     runs-on: ubuntu-latest
@@ -52,6 +58,17 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Sanitize branch name for tag
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          REF_NAME="${GITHUB_REF#refs/heads/}"
+          REF_SLUG="$(echo "$REF_NAME" | tr '[:upper:]' '[:lower:]' | sed 's|/|-|g' | sed 's|[^a-z0-9._-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||; s|-$||')"
+          echo "REF_SLUG=$REF_SLUG" >> $GITHUB_ENV
+
+      - name: Set default REF_SLUG for non-push
+        if: ${{ github.event_name != 'push' }}
+        run: echo "REF_SLUG=manual" >> $GITHUB_ENV
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v4
@@ -59,34 +76,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          platforms: linux/amd64
           tags: |
-              ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}
-              ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}-latest
-  deploy:
-    needs: push_to_registry
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to VM (main)
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VM_PUBLIC_IP_MAIN }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.RSA_VM_KEY }}
-          script: |
-            cd ~/infra
-            sudo git pull
-            ./start-docker.sh
-
-      - name: Deploy to VM (dev)
-        if: github.ref == 'refs/heads/dev'
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VM_PUBLIC_IP_DEV }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.RSA_VM_KEY }}
-          script: |
-            cd ~/infra
-            sudo git pull
-            ./start-docker.sh
-  
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.REF_SLUG }}-latest
