@@ -56,7 +56,7 @@ class PermissionController(private val permissionService: PermissionService) {
     @GetMapping("/snippetsByAccessType")
     fun getSnippetsByAccessType(
         @RequestParam userId: String,
-        @RequestParam accessType: PermissionType,
+        @RequestParam accessType: AccessType,
     ): List<String> {
         return permissionService.getSnippetsByAccessType(userId, accessType)
     }

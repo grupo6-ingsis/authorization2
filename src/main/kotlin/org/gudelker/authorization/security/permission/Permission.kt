@@ -28,5 +28,10 @@ class Permission(
 enum class PermissionType(val value: String) {
     READ("READ"),
     WRITE("WRITE"),
-    OWNER("OWNER"),
+}
+
+enum class AccessType {
+    OWNER,
+    SHARED,
+    ALL,
 }
