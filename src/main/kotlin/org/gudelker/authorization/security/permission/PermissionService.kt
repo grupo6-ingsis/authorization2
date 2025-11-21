@@ -39,6 +39,14 @@ class PermissionService(private val permissionRepository: PermissionRepository) 
         return permission?.permission
     }
 
+    fun getUsersWithPermissionForSnippet(snippetId: String): List<String> {
+        val permissions = permissionRepository.findAll()
+        return permissions
+            .filter { it.snippetId == snippetId }
+            .map { it.userId }
+            .distinct()
+    }
+
     fun authorizeUpdate(
         userId: String,
         snippetId: String,

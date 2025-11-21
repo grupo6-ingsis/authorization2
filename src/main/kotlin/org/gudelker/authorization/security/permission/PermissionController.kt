@@ -60,4 +60,11 @@ class PermissionController(private val permissionService: PermissionService) {
     ): List<String> {
         return permissionService.getSnippetsByAccessType(userId, accessType)
     }
+
+    @GetMapping("/users-with-access/{snippetId}")
+    fun getUsersWithAccess(
+        @PathVariable snippetId: String,
+    ): List<String> {
+        return permissionService.getUsersWithPermissionForSnippet(snippetId)
+    }
 }
