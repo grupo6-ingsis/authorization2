@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+      NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
