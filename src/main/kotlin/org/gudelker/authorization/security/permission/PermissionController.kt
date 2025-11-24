@@ -55,7 +55,7 @@ class PermissionController(private val permissionService: PermissionService) {
     ): PermissionType? {
         logger.info("Fetching permission for User: {}, Snippet: {}", userId, snippetId)
 
-        val permission = permissionService.getPermissionForSnippet(userId, snippetId)
+        val permission = permissionService.getPermissionForSnippet(snippetId, userId)
 
         if (permission != null) {
             logger.info("Permission found: {} for User: {}, Snippet: {}", permission, userId, snippetId)
