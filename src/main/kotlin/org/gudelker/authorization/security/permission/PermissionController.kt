@@ -2,6 +2,7 @@ package org.gudelker.authorization.security.permission
 
 import org.gudelker.authorization.security.dto.AuthorizeResponseDto
 import org.gudelker.authorization.security.input.AuthorizeRequestDto
+import org.slf4j.LoggerFactory
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,17 +17,35 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("api/permissions")
 class PermissionController(private val permissionService: PermissionService) {
+    private val logger = LoggerFactory.getLogger(PermissionController::class.java)
+
     @PostMapping("/authorize/{snippetId}")
     fun authorize(
         @PathVariable snippetId: String,
         @RequestBody request: AuthorizeRequestDto,
         @AuthenticationPrincipal jwt: Jwt,
     ): AuthorizeResponseDto {
-        return permissionService.authorize(
+        logger.info(
+            "Authorization request received. UserId: {}, SnippetId: {}, Permission: {}",
             request.userId,
             snippetId,
             request.permission,
         )
+
+        val response =
+            permissionService.authorize(
+                request.userId,
+                snippetId,
+                request.permission,
+            )
+
+        logger.info(
+            "Authorization completed. Permission: {}, UserId: {}, SnippetId: {}",
+            response.permission,
+            request.userId,
+            snippetId,
+        )
+        return response
     }
 
     @GetMapping("/{snippetId}")
@@ -34,7 +53,17 @@ class PermissionController(private val permissionService: PermissionService) {
         @PathVariable snippetId: String,
         @RequestParam userId: String,
     ): PermissionType? {
-        return permissionService.getPermissionForSnippet(snippetId, userId)
+        logger.info("Fetching permission for User: {}, Snippet: {}", userId, snippetId)
+
+        val permission = permissionService.getPermissionForSnippet(userId, snippetId)
+
+        if (permission != null) {
+            logger.info("Permission found: {} for User: {}, Snippet: {}", permission, userId, snippetId)
+        } else {
+            logger.warn("No permission found for User: {}, Snippet: {}", userId, snippetId)
+        }
+
+        return permission
     }
 
     @GetMapping("/authorize-update/{snippetId}")
@@ -42,7 +71,16 @@ class PermissionController(private val permissionService: PermissionService) {
         @PathVariable snippetId: String,
         @AuthenticationPrincipal jwt: Jwt,
     ): Boolean {
-        return permissionService.authorizeUpdate(jwt.id, snippetId)
+        logger.info("Authorizing update for JwtId: {}, Snippet: {}", jwt.id, snippetId)
+        val authorized = permissionService.authorizeUpdate(jwt.id, snippetId)
+        logger.info(
+            "Update authorization result: {} for JwtId: {}, Snippet: {}",
+            authorized,
+            jwt.id,
+            snippetId,
+        )
+
+        return authorized
     }
 
     @PostMapping("/can-write/{snippetId}")
@@ -50,7 +88,15 @@ class PermissionController(private val permissionService: PermissionService) {
         @PathVariable snippetId: String,
         @RequestHeader("X-User-Id") userId: String,
     ): Boolean {
-        return permissionService.canUserWriteSnippet(snippetId, userId)
+        logger.info("Checking write permission for User: {}, Snippet: {}", userId, snippetId)
+        val canWrite = permissionService.canUserWriteSnippet(snippetId, userId)
+        logger.info(
+            "Write permission check result: {} for User: {}, Snippet: {}",
+            canWrite,
+            userId,
+            snippetId,
+        )
+        return canWrite
     }
 
     @GetMapping("/snippetsByAccessType")
@@ -58,13 +104,24 @@ class PermissionController(private val permissionService: PermissionService) {
         @RequestParam userId: String,
         @RequestParam accessType: AccessType,
     ): List<String> {
-        return permissionService.getSnippetsByAccessType(userId, accessType)
+        logger.info("Fetching snippets by access type. User: {}, AccessType: {}", userId, accessType)
+        val snippets = permissionService.getSnippetsByAccessType(userId, accessType)
+        logger.info(
+            "Found {} snippets for User: {}, AccessType: {}",
+            snippets.size,
+            userId,
+            accessType,
+        )
+        return snippets
     }
 
     @GetMapping("/users-with-access/{snippetId}")
     fun getUsersWithAccess(
         @PathVariable snippetId: String,
     ): List<String> {
-        return permissionService.getUsersWithPermissionForSnippet(snippetId)
+        logger.info("Fetching users with access to Snippet: {}", snippetId)
+        val users = permissionService.getUsersWithPermissionForSnippet(snippetId)
+        logger.info("Found {} users with access to Snippet: {}", users.size, snippetId)
+        return users
     }
 }
